@@ -234,7 +234,8 @@ async function initDashboard() {
         } else {
           recentTbody.innerHTML = recent.map(doc => {
             const meta = getFileIconMeta(doc.file_name);
-            const statusClass = doc.status === 'Active' ? 'badge-active' : (doc.status === 'Draft' ? 'badge-draft' : 'badge-archived');
+            const st = (doc.status || '').toLowerCase();
+            const statusClass = st === 'active' ? 'badge-active' : (st === 'draft' ? 'badge-draft' : 'badge-archived');
             const canDownload = doc.user_access_role === 'owner' || doc.user_access_role === 'download';
 
             return `
@@ -383,7 +384,8 @@ function renderDocuments(docs) {
       const meta = getFileIconMeta(doc.file_name);
       const isOwner = doc.user_access_role === 'owner';
       const canDownload = isOwner || doc.user_access_role === 'download';
-      const statusClass = doc.status === 'Active' ? 'badge-active' : (doc.status === 'Draft' ? 'badge-draft' : 'badge-archived');
+      const st = (doc.status || '').toLowerCase();
+      const statusClass = st === 'active' ? 'badge-active' : (st === 'draft' ? 'badge-draft' : 'badge-archived');
 
       return `
         <tr>
@@ -441,7 +443,8 @@ function renderDocuments(docs) {
       const meta = getFileIconMeta(doc.file_name);
       const isOwner = doc.user_access_role === 'owner';
       const canDownload = isOwner || doc.user_access_role === 'download';
-      const statusClass = doc.status === 'Active' ? 'badge-active' : (doc.status === 'Draft' ? 'badge-draft' : 'badge-archived');
+      const st = (doc.status || '').toLowerCase();
+      const statusClass = st === 'active' ? 'badge-active' : (st === 'draft' ? 'badge-draft' : 'badge-archived');
 
       return `
         <div class="doc-card">
