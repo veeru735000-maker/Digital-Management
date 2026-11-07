@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const db = require('./db');
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 const documentRoutes = require('./routes/documentRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const accessRoutes = require('./routes/accessRoutes');
@@ -35,10 +36,11 @@ app.use(
 // Protect Private HTML Pages Middleware
 const protectedPages = [
   '/dashboard.html',
-  '/documents.html',
-  '/upload.html',
+  '/users.html',
   '/categories.html',
-  '/access.html'
+  '/documents.html',
+  '/access.html',
+  '/upload.html'
 ];
 
 app.use((req, res, next) => {
@@ -64,47 +66,31 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Mount API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/access', accessRoutes);
 
-// Dashboard Statistics API Endpoint
+// Dashboard Statistics API Endpoint (Total Users, Categories, Documents, Document Access)
 app.get('/api/stats', async (req, res) => {
   try {
     if (!req.session || !req.session.user) {
       return res.status(401).json({ success: false, message: 'Authentication required.' });
     }
 
-    const currentUserId = req.session.user.id;
+    // 1. Total Registered Users
+    const [userCountRow] = await db.query('SELECT COUNT(*) AS total_users FROM users');
 
-    // 1. Total Accessible Documents (Owned + Shared)
-    const [docCountRow] = await db.query(
-      `SELECT COUNT(DISTINCT d.document_id) AS total_documents
-       FROM documents d
-       LEFT JOIN document_access da ON d.document_id = da.document_id AND da.user_id = ?
-       WHERE (d.user_id = ? OR da.user_id = ?)`,
-      [currentUserId, currentUserId, currentUserId]
-    );
+    // 2. Total Categories
+    const [catCountRow] = await db.query('SELECT COUNT(*) AS total_categories FROM categories');
 
-    // 2. Total Owned Documents
-    const [myDocCountRow] = await db.query(
-      `SELECT COUNT(*) AS my_documents FROM documents WHERE user_id = ?`,
-      [currentUserId]
-    );
+    // 3. Total Documents
+    const [docCountRow] = await db.query('SELECT COUNT(*) AS total_documents FROM documents');
 
-    // 3. Total Categories
-    const [catCountRow] = await db.query(`SELECT COUNT(*) AS total_categories FROM categories`);
+    // 4. Total Document Access
+    const [accessCountRow] = await db.query('SELECT COUNT(*) AS total_access FROM document_access');
 
-    // 4. Total Registered Users
-    const [userCountRow] = await db.query(`SELECT COUNT(*) AS total_users FROM users`);
-
-    // 5. Total Shared With Me Documents
-    const [sharedCountRow] = await db.query(
-      `SELECT COUNT(*) AS shared_documents FROM document_access WHERE user_id = ?`,
-      [currentUserId]
-    );
-
-    // 6. Category breakdown for charts/progress
+    // 5. Category breakdown for charts/progress
     const [categoryBreakdown] = await db.query(
       `SELECT c.category_name, COUNT(d.document_id) AS count
        FROM categories c
@@ -116,11 +102,10 @@ app.get('/api/stats', async (req, res) => {
     return res.json({
       success: true,
       stats: {
-        totalDocuments: docCountRow[0].total_documents || 0,
-        myDocuments: myDocCountRow[0].my_documents || 0,
-        totalCategories: catCountRow[0].total_categories || 0,
         totalUsers: userCountRow[0].total_users || 0,
-        sharedDocuments: sharedCountRow[0].shared_documents || 0,
+        totalCategories: catCountRow[0].total_categories || 0,
+        totalDocuments: docCountRow[0].total_documents || 0,
+        totalAccess: accessCountRow[0].total_access || 0,
         categoryBreakdown
       }
     });

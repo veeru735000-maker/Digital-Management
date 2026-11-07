@@ -10,6 +10,51 @@ function requireAuth(req, res, next) {
   return res.status(401).json({ success: false, message: 'Authentication required. Please log in.' });
 }
 
+// GET /api/access - Retrieve all records from MySQL 'document_access' table with JOINs
+router.get('/', requireAuth, async (req, res) => {
+  try {
+    const { search } = req.query;
+
+    let query = `
+      SELECT 
+        da.access_id,
+        da.document_id,
+        da.user_id,
+        da.permission,
+        da.granted_date,
+        COALESCE(d.title, 'Deleted Document') AS document_title,
+        COALESCE(d.file_name, '') AS file_name,
+        COALESCE(u.name, 'Deleted User') AS user_name,
+        COALESCE(u.email, '') AS user_email,
+        COALESCE(owner.name, 'Unknown') AS owner_name
+      FROM document_access da
+      LEFT JOIN documents d ON da.document_id = d.document_id
+      LEFT JOIN users u ON da.user_id = u.user_id
+      LEFT JOIN users owner ON d.user_id = owner.user_id
+    `;
+    const params = [];
+
+    if (search && search.trim()) {
+      query += ` WHERE d.title LIKE ? OR u.name LIKE ? OR u.email LIKE ? OR da.permission LIKE ?`;
+      const term = `%${search.trim()}%`;
+      params.push(term, term, term, term);
+    }
+
+    query += ` ORDER BY da.access_id ASC`;
+
+    const [records] = await db.query(query, params);
+
+    return res.json({
+      success: true,
+      count: records.length,
+      records
+    });
+  } catch (error) {
+    console.error('[Document Access List Error]:', error);
+    return res.status(500).json({ success: false, message: 'Failed to retrieve access records.' });
+  }
+});
+
 // POST /api/access/share - Share a document with a user
 router.post('/share', requireAuth, async (req, res) => {
   try {
@@ -165,6 +210,30 @@ router.delete('/:access_id', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('[Access Revoke Error]:', error);
     return res.status(500).json({ success: false, message: 'Failed to revoke access permission.' });
+  }
+});
+
+// PUT /api/access/:access_id - Update permission level (view or download)
+router.put('/:access_id', requireAuth, async (req, res) => {
+  try {
+    const { access_id } = req.params;
+    const { permission } = req.body;
+    const perm = permission && permission.toLowerCase() === 'download' ? 'download' : 'view';
+
+    const [existing] = await db.query('SELECT access_id FROM document_access WHERE access_id = ?', [access_id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ success: false, message: 'Access record not found.' });
+    }
+
+    await db.query('UPDATE document_access SET permission = ?, granted_date = NOW() WHERE access_id = ?', [perm, access_id]);
+
+    return res.json({
+      success: true,
+      message: `Permission updated to ${perm.toUpperCase()}.`
+    });
+  } catch (error) {
+    console.error('[Document Access Update Error]:', error);
+    return res.status(500).json({ success: false, message: 'Failed to update access permission.' });
   }
 });
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Categories – Veerendra Digital Document Management System</title>
+  <title>Categories Table – Veerendra Digital Document Management System</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -25,24 +25,22 @@
       </div>
 
       <nav class="sidebar-nav">
-        <div class="nav-section-title">Navigation</div>
+        <div class="nav-section-title">Database Navigation</div>
         <a href="/dashboard.html" class="nav-link">
           <i class="fas fa-chart-pie"></i>
           <span>Dashboard</span>
         </a>
-        <a href="/documents.html" class="nav-link">
-          <i class="fas fa-folder-open"></i>
-          <span>All Documents</span>
+        <a href="/users.html" class="nav-link">
+          <i class="fas fa-users"></i>
+          <span>Users</span>
         </a>
-        <a href="/upload.html" class="nav-link">
-          <i class="fas fa-cloud-upload-alt"></i>
-          <span>Upload Document</span>
-        </a>
-
-        <div class="nav-section-title">Management</div>
         <a href="/categories.html" class="nav-link active">
           <i class="fas fa-tags"></i>
           <span>Categories</span>
+        </a>
+        <a href="/documents.html" class="nav-link">
+          <i class="fas fa-folder-open"></i>
+          <span>Documents</span>
         </a>
         <a href="/access.html" class="nav-link">
           <i class="fas fa-user-lock"></i>
@@ -73,8 +71,8 @@
             <i class="fas fa-bars"></i>
           </button>
           <div class="page-title-group">
-            <h1>Category Management</h1>
-            <p>Organize documents into structured categories in <strong>Veerendra Vault</strong></p>
+            <h1>MySQL Categories Table</h1>
+            <p>Direct view and management of the <code>categories</code> table in <strong>digital_document_db</strong></p>
           </div>
         </div>
 
@@ -87,23 +85,32 @@
 
       <!-- Content Body -->
       <main class="content-body">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <div>
+        <!-- Search & Control Bar -->
+        <div class="filter-bar">
+          <div class="search-input-group">
+            <i class="fas fa-search"></i>
+            <input type="text" id="categorySearchInput" class="search-input" placeholder="Search categories by name or description...">
+          </div>
+
+          <div style="display: flex; gap: 12px; align-items: center;">
             <span class="badge" style="background-color: #e0f2fe; color: #0369a1; font-size: 13px; font-weight: 700;" id="categoryTotalCount">
               Loading...
             </span>
+            <button class="btn btn-primary btn-sm" onclick="openModal('addCategoryModal')">
+              <i class="fas fa-folder-plus"></i> Add Category
+            </button>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="openModal('addCategoryModal')">
-            <i class="fas fa-folder-plus"></i> Add Category
-          </button>
         </div>
 
         <!-- Categories Table Panel -->
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">
-              <i class="fas fa-list-ul"></i> All Configured Document Categories
+              <i class="fas fa-database" style="color: var(--primary);"></i> MySQL Records in <code>categories</code>
             </div>
+            <button class="btn btn-outline btn-sm" onclick="loadCategories()">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
           </div>
 
           <div class="panel-body" style="padding: 0;">
@@ -111,16 +118,17 @@
               <table class="custom-table">
                 <thead>
                   <tr>
+                    <th style="width: 120px;">Category ID</th>
                     <th>Category Name</th>
                     <th>Description</th>
-                    <th>Linked Documents</th>
-                    <th>Actions</th>
+                    <th style="width: 160px;">Document Count</th>
+                    <th style="width: 130px;">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="categoriesTableBody">
                   <tr>
-                    <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                      <i class="fas fa-spinner fa-spin"></i> Loading categories...
+                    <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                      <i class="fas fa-spinner fa-spin"></i> Loading MySQL categories...
                     </td>
                   </tr>
                 </tbody>
@@ -148,8 +156,8 @@
             <input type="text" id="catNameInput" class="form-control" placeholder="e.g. Research Papers, Tax Invoices" required>
           </div>
           <div class="form-group">
-            <label class="form-label" for="catDescInput">Description (Optional)</label>
-            <textarea id="catDescInput" class="form-control" placeholder="Brief explanation of what documents go into this category..."></textarea>
+            <label class="form-label" for="catDescInput">Description</label>
+            <textarea id="catDescInput" class="form-control" placeholder="Brief description of category..."></textarea>
           </div>
         </div>
         <div class="modal-footer">
@@ -164,7 +172,7 @@
   <div class="modal-overlay" id="editCategoryModal">
     <div class="modal-dialog">
       <div class="modal-header">
-        <h3><i class="fas fa-edit" style="color: var(--secondary);"></i> Edit Category</h3>
+        <h3><i class="fas fa-edit" style="color: var(--secondary);"></i> Edit Category (ID: <span id="editCatDisplayId"></span>)</h3>
         <button class="modal-close-btn" onclick="closeModal('editCategoryModal')">
           <i class="fas fa-times"></i>
         </button>
@@ -199,7 +207,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to delete category <strong id="deleteCategoryName">this category</strong>?</p>
+        <p>Are you sure you want to delete category <strong id="deleteCategoryName">this category</strong> from MySQL?</p>
         <p id="deleteCatWarning" style="display: none; color: var(--danger); font-size: 13px; margin-top: 10px; padding: 10px; background: var(--danger-bg); border-radius: var(--radius-sm); border-left: 3px solid var(--danger);"></p>
       </div>
       <div class="modal-footer">

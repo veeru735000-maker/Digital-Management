@@ -20,3 +20,4 @@ start "" http://localhost:5000
 :: Start server
 npm start
 pause
+

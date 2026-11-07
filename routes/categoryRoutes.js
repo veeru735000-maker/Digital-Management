@@ -10,10 +10,11 @@ function requireAuth(req, res, next) {
   return res.status(401).json({ success: false, message: 'Authentication required. Please log in.' });
 }
 
-// GET /api/categories - Get all categories with document count
+// GET /api/categories - Get all categories with document count (and optional search)
 router.get('/', async (req, res) => {
   try {
-    const query = `
+    const { search } = req.query;
+    let query = `
       SELECT 
         c.category_id,
         c.category_name,
@@ -21,10 +22,20 @@ router.get('/', async (req, res) => {
         COUNT(d.document_id) AS document_count
       FROM categories c
       LEFT JOIN documents d ON c.category_id = d.category_id
-      GROUP BY c.category_id, c.category_name, c.description
-      ORDER BY c.category_name ASC
     `;
-    const [categories] = await db.query(query);
+    const params = [];
+
+    if (search && search.trim()) {
+      query += ` WHERE c.category_name LIKE ? OR c.description LIKE ?`;
+      const term = `%${search.trim()}%`;
+      params.push(term, term);
+    }
+
+    query += `
+      GROUP BY c.category_id, c.category_name, c.description
+      ORDER BY c.category_id ASC
+    `;
+    const [categories] = await db.query(query, params);
 
     return res.json({
       success: true,

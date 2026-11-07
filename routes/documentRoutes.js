@@ -142,10 +142,11 @@ router.post('/upload', requireAuth, (req, res) => {
   });
 });
 
-// GET /api/documents - Get documents with search and category filters
+// GET /api/documents - Get all documents from MySQL 'documents' table with JOINs
 router.get('/', requireAuth, async (req, res) => {
   try {
     const currentUserId = req.session.user.id;
+    const currentUserRole = req.session.user.role;
     const { search, category_id, filter } = req.query;
 
     let query = `
@@ -158,29 +159,30 @@ router.get('/', requireAuth, async (req, res) => {
         d.file_path,
         d.upload_date,
         d.status,
-        c.category_name,
-        u.name AS owner_name,
-        u.email AS owner_email,
+        COALESCE(c.category_name, 'Uncategorized') AS category_name,
+        COALESCE(u.name, 'Unknown') AS owner_name,
+        COALESCE(u.email, '') AS owner_email,
         CASE 
           WHEN d.user_id = ? THEN 'owner'
           WHEN da.permission IS NOT NULL THEN da.permission
-          ELSE 'none'
+          WHEN ? = 'admin' THEN 'owner'
+          ELSE 'view'
         END AS user_access_role
       FROM documents d
       LEFT JOIN categories c ON d.category_id = c.category_id
       LEFT JOIN users u ON d.user_id = u.user_id
       LEFT JOIN document_access da ON d.document_id = da.document_id AND da.user_id = ?
-      WHERE (d.user_id = ? OR da.user_id = ?)
+      WHERE 1=1
     `;
 
-    const params = [currentUserId, currentUserId, currentUserId, currentUserId];
+    const params = [currentUserId, currentUserRole, currentUserId];
 
-    // Filter by ownership tab: 'my' or 'shared'
+    // Optional Filter tabs: 'my' or 'shared'
     if (filter === 'my') {
       query += ` AND d.user_id = ?`;
       params.push(currentUserId);
     } else if (filter === 'shared') {
-      query += ` AND d.user_id != ? AND da.user_id = ?`;
+      query += ` AND da.user_id = ? AND d.user_id != ?`;
       params.push(currentUserId, currentUserId);
     }
 
@@ -190,14 +192,14 @@ router.get('/', requireAuth, async (req, res) => {
       params.push(parseInt(category_id));
     }
 
-    // Search by title or original file name
+    // Search by title, original file name, or owner name
     if (search && search.trim()) {
-      query += ` AND (d.title LIKE ? OR d.file_name LIKE ?)`;
+      query += ` AND (d.title LIKE ? OR d.file_name LIKE ? OR u.name LIKE ?)`;
       const term = `%${search.trim()}%`;
-      params.push(term, term);
+      params.push(term, term, term);
     }
 
-    query += ` ORDER BY d.upload_date DESC`;
+    query += ` ORDER BY d.document_id ASC`;
 
     const [documents] = await db.query(query, params);
 

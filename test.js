@@ -3,9 +3,6 @@
  * Veerendra - Digital Document Management System
  */
 
-const fs = require('fs');
-const path = require('path');
-
 const BASE_URL = 'http://localhost:5000';
 
 async function runTests() {
@@ -14,45 +11,18 @@ async function runTests() {
   console.log('===============================================================');
 
   // 1. Authenticate Admin
-  console.log('\n[TEST 1] Authenticating Admin User (Veerendra Kumar)...');
-  let loginRes = await fetch(`${BASE_URL}/api/auth/login`, {
+  console.log('\n[TEST 1] Authenticating Admin User (Veerendra)...');
+  const loginRes = await fetch(`${BASE_URL}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      email: 'veerendra@example.com',
+      email: 'veerendra@gmail.com',
       password: 'password123'
     })
   });
-
-  let cookieAdmin = loginRes.headers.get('set-cookie')?.split(';')[0];
-  if (!cookieAdmin) {
-    // If not existing, register
-    await fetch(`${BASE_URL}/api/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: 'Veerendra Kumar',
-        email: 'veerendra@example.com',
-        password: 'password123',
-        role: 'admin'
-      })
-    });
-    loginRes = await fetch(`${BASE_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: 'veerendra@example.com',
-        password: 'password123'
-      })
-    });
-    cookieAdmin = loginRes.headers.get('set-cookie')?.split(';')[0];
-  }
-
-  const meRes = await fetch(`${BASE_URL}/api/auth/me`, {
-    headers: { 'Cookie': cookieAdmin }
-  });
-  const meData = await meRes.json();
-  console.log('✓ Admin Authenticated:', meData.user.name, `(${meData.user.role})`);
+  const loginData = await loginRes.json();
+  const cookieAdmin = loginRes.headers.get('set-cookie')?.split(';')[0];
+  console.log('✓ Admin Authenticated:', loginData.user.name, `(${loginData.user.role})`);
 
   // 2. Fetch Dashboard Statistics
   console.log('\n[TEST 2] Verifying Dashboard Statistics API (/api/stats)...');
@@ -60,31 +30,40 @@ async function runTests() {
     headers: { 'Cookie': cookieAdmin }
   });
   const { stats } = await statsRes.json();
-  console.log('✓ Total Documents in Vault:', stats.totalDocuments);
-  console.log('✓ Total Categories Configured:', stats.totalCategories);
-  console.log('✓ Total Registered Users:', stats.totalUsers);
+  console.log('✓ Total Users:', stats.totalUsers);
+  console.log('✓ Total Categories:', stats.totalCategories);
+  console.log('✓ Total Documents:', stats.totalDocuments);
+  console.log('✓ Total Document Access:', stats.totalAccess);
 
-  // 3. Document Search & Filter
-  console.log('\n[TEST 3] Testing Document Search & Retrieval (/api/documents)...');
-  const docsRes = await fetch(`${BASE_URL}/api/documents?search=Report`, {
+  // 3. Users Table API
+  console.log('\n[TEST 3] Testing Users Table API (/api/users)...');
+  const usersRes = await fetch(`${BASE_URL}/api/users`, {
+    headers: { 'Cookie': cookieAdmin }
+  });
+  const usersData = await usersRes.json();
+  console.log(`✓ Retrieved ${usersData.count} users from MySQL.`);
+
+  // 4. Categories Table API
+  console.log('\n[TEST 4] Testing Categories Table API (/api/categories)...');
+  const catRes = await fetch(`${BASE_URL}/api/categories`);
+  const catData = await catRes.json();
+  console.log(`✓ Active Categories: ${catData.categories.length} categories loaded.`);
+
+  // 5. Documents Table API
+  console.log('\n[TEST 5] Testing Documents Table API (/api/documents)...');
+  const docsRes = await fetch(`${BASE_URL}/api/documents`, {
     headers: { 'Cookie': cookieAdmin }
   });
   const docsData = await docsRes.json();
-  console.log(`✓ Retrieved ${docsData.count} matching document(s).`);
+  console.log(`✓ Retrieved ${docsData.count} documents from MySQL.`);
 
-  // 4. Category Management
-  console.log('\n[TEST 4] Testing Category Management (/api/categories)...');
-  const catRes = await fetch(`${BASE_URL}/api/categories`);
-  const catData = await catRes.json();
-  console.log(`✓ Active Categories: ${catData.categories.length} categories loaded with document counts.`);
-
-  // 5. Document Access Management
-  console.log('\n[TEST 5] Testing Document Access & Sharing (/api/access)...');
-  const sharedByMeRes = await fetch(`${BASE_URL}/api/access/shared-by-me`, {
+  // 6. Access Table API
+  console.log('\n[TEST 6] Testing Access Table API (/api/access)...');
+  const accessRes = await fetch(`${BASE_URL}/api/access`, {
     headers: { 'Cookie': cookieAdmin }
   });
-  const sharedByMeData = await sharedByMeRes.json();
-  console.log(`✓ Active Document Permissions Granted: ${sharedByMeData.records.length} records.`);
+  const accessData = await accessRes.json();
+  console.log(`✓ Retrieved ${accessData.count} access permission records from MySQL.`);
 
   console.log('\n===============================================================');
   console.log('  ALL INTEGRATION TESTS PASSED WITH ZERO ERRORS (100% OK)      ');
@@ -95,4 +74,3 @@ runTests().catch(err => {
   console.error('Test execution failed:', err.message);
   process.exit(1);
 });
-

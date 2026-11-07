@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users Table – Veerendra Digital Document Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/dashboard.html" class="brand-logo">
+          <div class="brand-icon">
+            <i class="fas fa-file-shield"></i>
+          </div>
+          <div class="brand-text">
+            <h2>Veerendra</h2>
+            <span>Document Vault</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Database Navigation</div>
+        <a href="/dashboard.html" class="nav-link">
+          <i class="fas fa-chart-pie"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="/users.html" class="nav-link active">
+          <i class="fas fa-users"></i>
+          <span>Users</span>
+        </a>
+        <a href="/categories.html" class="nav-link">
+          <i class="fas fa-tags"></i>
+          <span>Categories</span>
+        </a>
+        <a href="/documents.html" class="nav-link">
+          <i class="fas fa-folder-open"></i>
+          <span>Documents</span>
+        </a>
+        <a href="/access.html" class="nav-link">
+          <i class="fas fa-user-lock"></i>
+          <span>Document Access</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-snippet">
+          <div class="user-avatar js-user-avatar">U</div>
+          <div class="user-info">
+            <div class="user-name js-user-name">Loading...</div>
+            <div class="user-role-badge js-user-role">User</div>
+          </div>
+          <button class="btn-sidebar-logout js-btn-logout" title="Sign Out">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="page-title-group">
+            <h1>MySQL Users Table</h1>
+            <p>Direct view and management of the <code>users</code> table in <strong>digital_document_db</strong></p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="btn btn-primary btn-sm" onclick="openModal('addUserModal')">
+            <i class="fas fa-user-plus"></i> Add New User
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Body -->
+      <main class="content-body">
+        <!-- Search & Control Bar -->
+        <div class="filter-bar">
+          <div class="search-input-group">
+            <i class="fas fa-search"></i>
+            <input type="text" id="userSearchInput" class="search-input" placeholder="Search users by name, email, or role...">
+          </div>
+
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <span class="badge" style="background-color: #e0e7ff; color: #4338ca; font-size: 13px; font-weight: 700;" id="userTotalBadge">
+              Loading users...
+            </span>
+            <button class="btn btn-primary btn-sm" onclick="openModal('addUserModal')">
+              <i class="fas fa-plus"></i> Add User
+            </button>
+          </div>
+        </div>
+
+        <!-- Users Table Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-database" style="color: var(--primary);"></i> MySQL Records in <code>users</code>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="loadUsers()">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+
+          <div class="panel-body" style="padding: 0;">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th style="width: 100px;">User ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th style="width: 130px;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                  <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                      <i class="fas fa-spinner fa-spin"></i> Loading MySQL records...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add User Modal -->
+  <div class="modal-overlay" id="addUserModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-plus" style="color: var(--primary);"></i> Add User to MySQL</h3>
+        <button class="modal-close-btn" onclick="closeModal('addUserModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="addUserForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="addUserName">Full Name <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="addUserName" class="form-control" placeholder="e.g. Ramesh Kumar" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="addUserEmail">Email Address <span style="color: var(--danger);">*</span></label>
+            <input type="email" id="addUserEmail" class="form-control" placeholder="name@example.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="addUserRole">Role</label>
+            <select id="addUserRole" class="form-control">
+              <option value="user" selected>user (Standard User)</option>
+              <option value="admin">admin (Administrator)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="addUserPassword">Password <span style="color: var(--danger);">*</span></label>
+            <input type="password" id="addUserPassword" class="form-control" placeholder="Minimum 6 characters" required>
+            <small style="color: var(--text-muted); font-size: 11px;">Password is automatically hashed with bcrypt before saving to MySQL.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addUserModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Save User to Database</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div class="modal-overlay" id="editUserModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-edit" style="color: var(--secondary);"></i> Edit User (MySQL ID: <span id="editUserDisplayId"></span>)</h3>
+        <button class="modal-close-btn" onclick="closeModal('editUserModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="editUserForm">
+        <div class="modal-body">
+          <input type="hidden" id="editUserId">
+          <div class="form-group">
+            <label class="form-label" for="editUserName">Full Name <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="editUserName" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="editUserEmail">Email Address <span style="color: var(--danger);">*</span></label>
+            <input type="email" id="editUserEmail" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="editUserRole">Role</label>
+            <select id="editUserRole" class="form-control">
+              <option value="user">user</option>
+              <option value="admin">admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="editUserPassword">New Password (Optional)</label>
+            <input type="password" id="editUserPassword" class="form-control" placeholder="Leave blank to keep existing password">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('editUserModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete User Modal -->
+  <div class="modal-overlay" id="deleteUserModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Delete User</h3>
+        <button class="modal-close-btn" onclick="closeModal('deleteUserModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to permanently delete user <strong id="deleteUserName"></strong> from the <code>users</code> table?</p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
+          All documents and access records linked to this user will also be removed via MySQL CASCADE constraint.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('deleteUserModal')">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="executeDeleteUser()"><i class="fas fa-trash-alt"></i> Delete Permanently</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>

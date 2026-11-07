@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document Access & Permissions – Veerendra Digital Document Management System</title>
+  <title>Document Access Table – Veerendra Digital Document Management System</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -25,24 +25,22 @@
       </div>
 
       <nav class="sidebar-nav">
-        <div class="nav-section-title">Navigation</div>
+        <div class="nav-section-title">Database Navigation</div>
         <a href="/dashboard.html" class="nav-link">
           <i class="fas fa-chart-pie"></i>
           <span>Dashboard</span>
         </a>
-        <a href="/documents.html" class="nav-link">
-          <i class="fas fa-folder-open"></i>
-          <span>All Documents</span>
+        <a href="/users.html" class="nav-link">
+          <i class="fas fa-users"></i>
+          <span>Users</span>
         </a>
-        <a href="/upload.html" class="nav-link">
-          <i class="fas fa-cloud-upload-alt"></i>
-          <span>Upload Document</span>
-        </a>
-
-        <div class="nav-section-title">Management</div>
         <a href="/categories.html" class="nav-link">
           <i class="fas fa-tags"></i>
           <span>Categories</span>
+        </a>
+        <a href="/documents.html" class="nav-link">
+          <i class="fas fa-folder-open"></i>
+          <span>Documents</span>
         </a>
         <a href="/access.html" class="nav-link active">
           <i class="fas fa-user-lock"></i>
@@ -73,104 +71,46 @@
             <i class="fas fa-bars"></i>
           </button>
           <div class="page-title-group">
-            <h1>Document Access Control</h1>
-            <p>Manage sharing permissions and multi-user access in <strong>Veerendra Vault</strong></p>
+            <h1>MySQL Document Access Table</h1>
+            <p>Direct view and management of the <code>document_access</code> table in <strong>digital_document_db</strong></p>
           </div>
         </div>
 
         <div class="topbar-right">
-          <a href="/upload.html" class="btn btn-primary btn-sm">
-            <i class="fas fa-cloud-upload-alt"></i> Upload Document
-          </a>
+          <button class="btn btn-primary btn-sm" onclick="openModal('shareDocModal')">
+            <i class="fas fa-share-alt"></i> Share Document
+          </button>
         </div>
       </header>
 
       <!-- Content Body -->
       <main class="content-body">
-        <!-- Share Document Form Panel -->
-        <div class="panel" style="margin-bottom: 32px;">
-          <div class="panel-header">
-            <div class="panel-title">
-              <i class="fas fa-share-nodes"></i> Grant Document Sharing Permission
-            </div>
+        <!-- Search & Control Bar -->
+        <div class="filter-bar">
+          <div class="search-input-group">
+            <i class="fas fa-search"></i>
+            <input type="text" id="accessSearchInput" class="search-input" placeholder="Search by document, user, or permission...">
           </div>
 
-          <div class="panel-body">
-            <form id="shareDocumentForm">
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px;">
-                <!-- Select Document -->
-                <div class="form-group" style="margin-bottom: 0;">
-                  <label class="form-label" for="shareDocSelect">Select Your Document <span style="color: var(--danger);">*</span></label>
-                  <select id="shareDocSelect" class="form-control" required>
-                    <option value="">Loading your documents...</option>
-                  </select>
-                </div>
-
-                <!-- Select Target User -->
-                <div class="form-group" style="margin-bottom: 0;">
-                  <label class="form-label" for="shareUserSelect">Recipient Registered User <span style="color: var(--danger);">*</span></label>
-                  <select id="shareUserSelect" class="form-control" required>
-                    <option value="">Loading users...</option>
-                  </select>
-                </div>
-
-                <!-- Select Permission -->
-                <div class="form-group" style="margin-bottom: 0;">
-                  <label class="form-label" for="sharePermissionSelect">Permission Level</label>
-                  <select id="sharePermissionSelect" class="form-control">
-                    <option value="view" selected>View Only (Online preview only)</option>
-                    <option value="download">View & Download (Full access)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
-                <button type="submit" id="btnSubmitShare" class="btn btn-primary" style="padding: 10px 24px;">
-                  <i class="fas fa-user-plus"></i> Share Document
-                </button>
-              </div>
-            </form>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <span class="badge" style="background-color: #f5f3ff; color: #6d28d9; font-size: 13px; font-weight: 700;" id="accessTotalBadge">
+              Loading...
+            </span>
+            <button class="btn btn-primary btn-sm" onclick="openModal('shareDocModal')">
+              <i class="fas fa-plus"></i> Grant Access
+            </button>
           </div>
         </div>
 
-        <!-- Section 1: Documents Shared By You -->
-        <div class="panel" style="margin-bottom: 32px;">
-          <div class="panel-header">
-            <div class="panel-title">
-              <i class="fas fa-paper-plane" style="color: var(--primary);"></i> Documents You Have Shared With Others
-            </div>
-          </div>
-
-          <div class="panel-body" style="padding: 0;">
-            <div class="table-responsive">
-              <table class="custom-table">
-                <thead>
-                  <tr>
-                    <th>Document</th>
-                    <th>Shared With User</th>
-                    <th>Permission</th>
-                    <th>Date Granted</th>
-                    <th>Revoke Access</th>
-                  </tr>
-                </thead>
-                <tbody id="sharedByMeTableBody">
-                  <tr>
-                    <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">
-                      <i class="fas fa-spinner fa-spin"></i> Loading shared permissions...
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Section 2: Documents Shared With You -->
+        <!-- Document Access Table Panel -->
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">
-              <i class="fas fa-inbox" style="color: var(--secondary);"></i> Documents Shared With You
+              <i class="fas fa-database" style="color: var(--primary);"></i> MySQL Records in <code>document_access</code>
             </div>
+            <button class="btn btn-outline btn-sm" onclick="loadAccessRecords()">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
           </div>
 
           <div class="panel-body" style="padding: 0;">
@@ -178,18 +118,18 @@
               <table class="custom-table">
                 <thead>
                   <tr>
-                    <th>Document</th>
-                    <th>Category</th>
-                    <th>Owner</th>
-                    <th>Your Permission</th>
-                    <th>Shared Date</th>
-                    <th>Actions</th>
+                    <th style="width: 110px;">Access ID</th>
+                    <th>Document Title</th>
+                    <th>User Name</th>
+                    <th>Permission</th>
+                    <th>Granted Date</th>
+                    <th style="width: 220px;">Permission Actions</th>
                   </tr>
                 </thead>
-                <tbody id="sharedWithMeTableBody">
+                <tbody id="accessTableBody">
                   <tr>
-                    <td colspan="6" style="text-align: center; padding: 30px; color: var(--text-muted);">
-                      <i class="fas fa-spinner fa-spin"></i> Loading shared documents...
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                      <i class="fas fa-spinner fa-spin"></i> Loading MySQL access records...
                     </td>
                   </tr>
                 </tbody>
@@ -201,23 +141,45 @@
     </div>
   </div>
 
-  <!-- Document Preview Modal -->
-  <div class="modal-overlay" id="previewModal">
-    <div class="modal-dialog modal-lg">
+  <!-- Share Document Modal -->
+  <div class="modal-overlay" id="shareDocModal">
+    <div class="modal-dialog">
       <div class="modal-header">
-        <h3 id="previewModalTitle">Document Preview</h3>
-        <button class="modal-close-btn" onclick="closeModal('previewModal')">
+        <h3><i class="fas fa-share-nodes" style="color: var(--primary);"></i> Grant Document Permission</h3>
+        <button class="modal-close-btn" onclick="closeModal('shareDocModal')">
           <i class="fas fa-times"></i>
         </button>
       </div>
-      <div class="modal-body" id="previewModalBody"></div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('previewModal')">Close Preview</button>
-      </div>
+      <form id="shareModalForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="shareDocIdSelect">Select Document <span style="color: var(--danger);">*</span></label>
+            <select id="shareDocIdSelect" class="form-control" required>
+              <option value="">Loading documents...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="shareUserIdSelect">Select Target User <span style="color: var(--danger);">*</span></label>
+            <select id="shareUserIdSelect" class="form-control" required>
+              <option value="">Loading users...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sharePermSelect">Permission Level</label>
+            <select id="sharePermSelect" class="form-control">
+              <option value="view" selected>View Only (Online preview only)</option>
+              <option value="download">View & Download (Full access)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('shareDocModal')">Cancel</button>
+          <button type="submit" id="btnSubmitShareModal" class="btn btn-primary"><i class="fas fa-check"></i> Save to Database</button>
+        </div>
+      </form>
     </div>
   </div>
 
   <script src="/js/script.js"></script>
 </body>
 </html>
-

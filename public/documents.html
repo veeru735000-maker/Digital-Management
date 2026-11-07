@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>All Documents – Veerendra Digital Document Management System</title>
+  <title>Documents Table – Veerendra Digital Document Management System</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -25,24 +25,22 @@
       </div>
 
       <nav class="sidebar-nav">
-        <div class="nav-section-title">Navigation</div>
+        <div class="nav-section-title">Database Navigation</div>
         <a href="/dashboard.html" class="nav-link">
           <i class="fas fa-chart-pie"></i>
           <span>Dashboard</span>
         </a>
-        <a href="/documents.html" class="nav-link active">
-          <i class="fas fa-folder-open"></i>
-          <span>All Documents</span>
+        <a href="/users.html" class="nav-link">
+          <i class="fas fa-users"></i>
+          <span>Users</span>
         </a>
-        <a href="/upload.html" class="nav-link">
-          <i class="fas fa-cloud-upload-alt"></i>
-          <span>Upload Document</span>
-        </a>
-
-        <div class="nav-section-title">Management</div>
         <a href="/categories.html" class="nav-link">
           <i class="fas fa-tags"></i>
           <span>Categories</span>
+        </a>
+        <a href="/documents.html" class="nav-link active">
+          <i class="fas fa-folder-open"></i>
+          <span>Documents</span>
         </a>
         <a href="/access.html" class="nav-link">
           <i class="fas fa-user-lock"></i>
@@ -73,15 +71,15 @@
             <i class="fas fa-bars"></i>
           </button>
           <div class="page-title-group">
-            <h1>Document Repository</h1>
-            <p>Manage, inspect, share, and download files in <strong>Veerendra Vault</strong></p>
+            <h1>MySQL Documents Table</h1>
+            <p>Direct view and management of the <code>documents</code> table in <strong>digital_document_db</strong></p>
           </div>
         </div>
 
         <div class="topbar-right">
-          <a href="/upload.html" class="btn btn-primary btn-sm">
+          <button class="btn btn-primary btn-sm" onclick="openModal('uploadDocModal')">
             <i class="fas fa-cloud-upload-alt"></i> Upload Document
-          </a>
+          </button>
         </div>
       </header>
 
@@ -91,7 +89,7 @@
         <div class="filter-bar">
           <div class="search-input-group">
             <i class="fas fa-search"></i>
-            <input type="text" id="docSearchInput" class="search-input" placeholder="Search by document title or filename...">
+            <input type="text" id="docSearchInput" class="search-input" placeholder="Search by title, filename, or owner...">
           </div>
 
           <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
@@ -100,52 +98,46 @@
               <option value="">All Categories</option>
             </select>
 
-            <!-- Ownership Tabs -->
-            <div class="filter-tabs">
-              <button class="tab-btn active" data-filter="all">All Accessible</button>
-              <button class="tab-btn" data-filter="my">My Uploads</button>
-              <button class="tab-btn" data-filter="shared">Shared With Me</button>
-            </div>
+            <span class="badge" style="background-color: #e0e7ff; color: #4338ca; font-size: 13px; font-weight: 700;" id="docTotalCountBadge">
+              Loading...
+            </span>
 
-            <!-- View Switcher (Table vs Grid) -->
-            <div style="display: flex; gap: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2px; background: #fff;">
-              <button class="btn-icon active" id="viewModeTable" title="Table View">
-                <i class="fas fa-list"></i>
-              </button>
-              <button class="btn-icon" id="viewModeGrid" title="Grid View">
-                <i class="fas fa-th-large"></i>
-              </button>
-            </div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('uploadDocModal')">
+              <i class="fas fa-upload"></i> Upload
+            </button>
           </div>
         </div>
 
-        <!-- Document Header Info -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <span class="badge" style="background-color: #e0e7ff; color: #4338ca; font-size: 13px; font-weight: 700;" id="docTotalCountBadge">
-            Loading documents...
-          </span>
-        </div>
-
-        <!-- Table View -->
+        <!-- Table View Panel -->
         <div class="panel" id="documentsTableView">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-database" style="color: var(--primary);"></i> MySQL Records in <code>documents</code> (with SQL JOIN)
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="fetchDocuments()">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+
           <div class="panel-body" style="padding: 0;">
             <div class="table-responsive">
               <table class="custom-table">
                 <thead>
                   <tr>
-                    <th>Document</th>
-                    <th>Category</th>
-                    <th>Uploader</th>
-                    <th>Uploaded On</th>
+                    <th style="width: 110px;">Doc ID</th>
+                    <th>Title</th>
+                    <th>Owner Name</th>
+                    <th>Category Name</th>
+                    <th>File Name</th>
+                    <th>Upload Date</th>
                     <th>Status</th>
-                    <th>Access</th>
-                    <th>Actions</th>
+                    <th style="width: 140px;">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="documentsTableBody">
                   <tr>
-                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                      <i class="fas fa-spinner fa-spin"></i> Loading documents...
+                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                      <i class="fas fa-spinner fa-spin"></i> Loading documents from MySQL...
                     </td>
                   </tr>
                 </tbody>
@@ -153,12 +145,49 @@
             </div>
           </div>
         </div>
-
-        <!-- Grid View (Hidden by default) -->
-        <div class="doc-grid" id="documentsGrid" style="display: none;">
-          <!-- Dynamically populated -->
-        </div>
       </main>
+    </div>
+  </div>
+
+  <!-- Upload Document Modal -->
+  <div class="modal-overlay" id="uploadDocModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><i class="fas fa-cloud-upload-alt" style="color: var(--primary);"></i> Upload Document to MySQL</h3>
+        <button class="modal-close-btn" onclick="closeModal('uploadDocModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="modalUploadForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Select File (PDF, DOC, DOCX, JPG, PNG) <span style="color: var(--danger);">*</span></label>
+            <input type="file" id="modalFileInput" class="form-control" required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalDocTitle">Document Title <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="modalDocTitle" class="form-control" placeholder="e.g. Master Degree or Project Plan" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalCategorySelect">Category</label>
+            <select id="modalCategorySelect" class="form-control">
+              <option value="">Select Category (Optional)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalStatusSelect">Status</label>
+            <select id="modalStatusSelect" class="form-control">
+              <option value="Active" selected>Active</option>
+              <option value="Draft">Draft</option>
+              <option value="Archived">Archived</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('uploadDocModal')">Cancel</button>
+          <button type="submit" id="btnModalUploadSubmit" class="btn btn-primary"><i class="fas fa-upload"></i> Upload & Save</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -178,38 +207,6 @@
     </div>
   </div>
 
-  <!-- Quick Share Modal -->
-  <div class="modal-overlay" id="quickShareModal">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h3 id="quickShareDocTitle">Share Document</h3>
-        <button class="modal-close-btn" onclick="closeModal('quickShareModal')">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="quickShareDocId">
-        <div class="form-group">
-          <label class="form-label" for="quickShareUserSelect">Select Registered User</label>
-          <select id="quickShareUserSelect" class="form-control">
-            <option value="">Loading users...</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="quickSharePermission">Permission Level</label>
-          <select id="quickSharePermission" class="form-control">
-            <option value="view">View Only (Online preview only)</option>
-            <option value="download">View & Download (Full access)</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('quickShareModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="executeQuickShare()"><i class="fas fa-share-alt"></i> Grant Permission</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Delete Document Confirmation Modal -->
   <div class="modal-overlay" id="deleteDocModal">
     <div class="modal-dialog">
@@ -220,9 +217,9 @@
         </button>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to permanently delete <strong id="deleteTargetName">this document</strong>?</p>
+        <p>Are you sure you want to permanently delete <strong id="deleteTargetName">this document</strong> from MySQL?</p>
         <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
-          This will remove the file from server storage and remove all shared access permissions. This action cannot be undone.
+          This will remove the file record from MySQL and unlink shared permissions.
         </p>
       </div>
       <div class="modal-footer">
@@ -235,4 +232,3 @@
   <script src="/js/script.js"></script>
 </body>
 </html>
-
