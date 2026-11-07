@@ -15,29 +15,38 @@ const pool = mysql.createPool({
   keepAliveInitialDelay: 0
 });
 
-// Test database connection directly using root and veeru credentials
+// Test database connection and display record counts from all 4 tables
 async function testConnection() {
   try {
     const connection = await pool.getConnection();
-    const [rows] = await connection.query('SELECT CURRENT_USER() as connected_user, DATABASE() as db_name;');
-    
-    console.log('=============================================================');
-    console.log('MySQL Database Connected Successfully!');
-    console.log(`Database:       ${rows[0].db_name}`);
-    console.log(`Connected User: ${rows[0].connected_user}`);
-    console.log(`Host & Port:    ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || 3306}`);
-    console.log(`Auth Source:    .env (DB_USER=${process.env.DB_USER || 'root'}, DB_PASSWORD=${process.env.DB_PASSWORD ? '******' : 'none'})`);
-    console.log('=============================================================');
-    
-    // Release the test connection back to pool
+
+    // 1. Verify Database and Current User
+    const [dbInfo] = await connection.query('SELECT DATABASE() AS db_name, CURRENT_USER() AS connected_user;');
+    const currentDb = dbInfo[0].db_name;
+    const currentUser = dbInfo[0].connected_user.split('@')[0];
+
+    // 2. Query record counts from all four tables
+    const [[{ user_count }]] = await connection.query('SELECT COUNT(*) AS user_count FROM users;');
+    const [[{ cat_count }]] = await connection.query('SELECT COUNT(*) AS cat_count FROM categories;');
+    const [[{ doc_count }]] = await connection.query('SELECT COUNT(*) AS doc_count FROM documents;');
+    const [[{ access_count }]] = await connection.query('SELECT COUNT(*) AS access_count FROM document_access;');
+
+    // 3. Display exact expected terminal output
+    console.log('MYSQL CONNECTION SUCCESSFUL');
+    console.log(`Connected User: ${currentUser}`);
+    console.log(`Database: ${currentDb}`);
+    console.log(`Users: ${user_count}`);
+    console.log(`Categories: ${cat_count}`);
+    console.log(`Documents: ${doc_count}`);
+    console.log(`Document Access: ${access_count}`);
+
+    // Release connection back to pool
     connection.release();
   } catch (error) {
-    console.error('=============================================================');
-    console.error('MySQL Database Connection Failed!');
-    console.error(`Error Code:    ${error.code}`);
+    console.error('MYSQL CONNECTION FAILED');
+    console.error(`Error Code: ${error.code}`);
     console.error(`Error Message: ${error.message}`);
     console.error('Please verify your MySQL service is running and credentials in .env are correct.');
-    console.error('=============================================================');
   }
 }
 
