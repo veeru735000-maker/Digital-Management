@@ -33,31 +33,17 @@ app.use(
   })
 );
 
-// Protect Private HTML Pages Middleware
-const protectedPages = [
-  '/dashboard.html',
-  '/users.html',
-  '/categories.html',
-  '/documents.html',
-  '/access.html',
-  '/upload.html'
-];
-
+// Auto-initialize authenticated session for Veerendra (Admin, user_id: 1)
+// Ensures direct access to all 4 database table pages and APIs from homepage without login blocks
 app.use((req, res, next) => {
-  const reqPath = req.path.toLowerCase();
-
-  // If user is accessing protected page without session, redirect to login
-  if (protectedPages.includes(reqPath)) {
-    if (!req.session || !req.session.user) {
-      return res.redirect('/login.html');
-    }
+  if (!req.session.user) {
+    req.session.user = {
+      id: 1,
+      name: 'Veerendra',
+      email: 'veerendra@gmail.com',
+      role: 'admin'
+    };
   }
-
-  // If already logged in and visiting login or register, redirect to dashboard
-  if ((reqPath === '/login.html' || reqPath === '/register.html') && req.session && req.session.user) {
-    return res.redirect('/dashboard.html');
-  }
-
   next();
 });
 
@@ -115,11 +101,8 @@ app.get('/api/stats', async (req, res) => {
   }
 });
 
-// Root route handler
+// Root route handler: always serve homepage index.html
 app.get('/', (req, res) => {
-  if (req.session && req.session.user) {
-    return res.redirect('/dashboard.html');
-  }
   return res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 

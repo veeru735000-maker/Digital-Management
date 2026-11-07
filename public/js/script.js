@@ -1129,6 +1129,206 @@ window.addEventListener('click', (e) => {
 });
 
 // ==========================================================================
+// Landing Page Controller (index.html / Homepage)
+// ==========================================================================
+function switchLandingTab(tabName) {
+  // Update buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  if (event && event.currentTarget) {
+    event.currentTarget.classList.add('active');
+  }
+
+  // Update tabs
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  const targetTab = document.getElementById(`tab-${tabName}`);
+  if (targetTab) {
+    targetTab.classList.add('active');
+  }
+}
+
+async function initLandingPage() {
+  const landingStatUsers = document.getElementById('landingStatUsers');
+  if (!landingStatUsers) return;
+
+  // 1. Fetch live stats
+  try {
+    const statsRes = await apiFetch('/api/stats');
+    if (statsRes && statsRes.ok) {
+      const statsData = await statsRes.json();
+      if (statsData.success && statsData.stats) {
+        document.getElementById('landingStatUsers').textContent = statsData.stats.totalUsers;
+        document.getElementById('landingStatCategories').textContent = statsData.stats.totalCategories;
+        document.getElementById('landingStatDocuments').textContent = statsData.stats.totalDocuments;
+        document.getElementById('landingStatAccess').textContent = statsData.stats.totalAccess;
+      }
+    }
+  } catch (e) {
+    console.error('Error fetching landing stats:', e);
+  }
+
+  // 2. Fetch Users
+  try {
+    const uRes = await apiFetch('/api/users');
+    if (uRes && uRes.ok) {
+      const uData = await uRes.json();
+      const users = uData.users || [];
+      const badge = document.getElementById('landingUsersCount');
+      if (badge) badge.textContent = users.length;
+      const tbody = document.getElementById('landingUsersTableBody');
+      if (tbody) {
+        if (users.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No users found in MySQL table users</td></tr>';
+        } else {
+          tbody.innerHTML = users.map(u => `
+            <tr>
+              <td><strong>#${u.user_id}</strong></td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="user-avatar" style="width: 28px; height: 28px; font-size: 11px;">${u.name.charAt(0).toUpperCase()}</div>
+                  <span style="font-weight: 600;">${u.name}</span>
+                </div>
+              </td>
+              <td><code>${u.email}</code></td>
+              <td>
+                <span class="badge" style="background-color: ${u.role === 'admin' ? '#eef2ff' : '#f1f5f9'}; color: ${u.role === 'admin' ? '#4338ca' : '#475569'}; font-weight: 700;">
+                  ${u.role.toUpperCase()}
+                </span>
+              </td>
+              <td style="text-align: right;">
+                <a href="/users.html" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 4px 10px;">
+                  Manage <i class="fas fa-arrow-right"></i>
+                </a>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error loading landing users:', e);
+  }
+
+  // 3. Fetch Categories
+  try {
+    const cRes = await apiFetch('/api/categories');
+    if (cRes && cRes.ok) {
+      const cData = await cRes.json();
+      const cats = cData.categories || [];
+      const badge = document.getElementById('landingCategoriesCount');
+      if (badge) badge.textContent = cats.length;
+      const tbody = document.getElementById('landingCategoriesTableBody');
+      if (tbody) {
+        if (cats.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No categories found in MySQL table categories</td></tr>';
+        } else {
+          tbody.innerHTML = cats.map(c => `
+            <tr>
+              <td><strong>#${c.category_id}</strong></td>
+              <td style="font-weight: 600;">${c.category_name}</td>
+              <td style="color: var(--text-muted); font-size: 13px;">${c.description || 'No description'}</td>
+              <td>
+                <span class="badge" style="background-color: #e0f2fe; color: #0369a1; font-weight: 700;">
+                  ${c.document_count || 0} Docs
+                </span>
+              </td>
+              <td style="text-align: right;">
+                <a href="/categories.html" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 4px 10px;">
+                  Manage <i class="fas fa-arrow-right"></i>
+                </a>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error loading landing categories:', e);
+  }
+
+  // 4. Fetch Documents
+  try {
+    const dRes = await apiFetch('/api/documents');
+    if (dRes && dRes.ok) {
+      const dData = await dRes.json();
+      const docs = dData.documents || [];
+      const badge = document.getElementById('landingDocumentsCount');
+      if (badge) badge.textContent = docs.length;
+      const tbody = document.getElementById('landingDocumentsTableBody');
+      if (tbody) {
+        if (docs.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No documents found in MySQL table documents</td></tr>';
+        } else {
+          tbody.innerHTML = docs.map(d => `
+            <tr>
+              <td><strong>#${d.document_id}</strong></td>
+              <td style="font-weight: 600; color: var(--text-main);">${d.title}</td>
+              <td><i class="fas fa-user-circle" style="color: #64748b;"></i> ${d.owner_name}</td>
+              <td>
+                <span class="badge" style="background-color: #f1f5f9; color: #334155;">
+                  ${d.category_name}
+                </span>
+              </td>
+              <td>
+                <span class="badge badge-success">${d.status || 'Active'}</span>
+              </td>
+              <td style="text-align: right;">
+                <a href="/documents.html" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 4px 10px;">
+                  Manage <i class="fas fa-arrow-right"></i>
+                </a>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error loading landing documents:', e);
+  }
+
+  // 5. Fetch Access Records
+  try {
+    const aRes = await apiFetch('/api/access');
+    if (aRes && aRes.ok) {
+      const aData = await aRes.json();
+      const records = aData.records || [];
+      const badge = document.getElementById('landingAccessCount');
+      if (badge) badge.textContent = records.length;
+      const tbody = document.getElementById('landingAccessTableBody');
+      if (tbody) {
+        if (records.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No access records found in MySQL table document_access</td></tr>';
+        } else {
+          tbody.innerHTML = records.map(a => `
+            <tr>
+              <td><strong>#${a.access_id}</strong></td>
+              <td style="font-weight: 600;">${a.document_title}</td>
+              <td><i class="fas fa-user" style="color: #64748b;"></i> ${a.user_name}</td>
+              <td>
+                <span class="badge" style="background-color: ${a.permission === 'download' ? '#dcfce7' : '#e0e7ff'}; color: ${a.permission === 'download' ? '#15803d' : '#3730a3'}; font-weight: 700;">
+                  ${a.permission === 'download' ? 'View & Download' : 'View Only'}
+                </span>
+              </td>
+              <td style="font-size: 12px; color: var(--text-muted);">${formatDate(a.granted_date)}</td>
+              <td style="text-align: right;">
+                <a href="/access.html" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 4px 10px;">
+                  Manage <i class="fas fa-arrow-right"></i>
+                </a>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error loading landing access:', e);
+  }
+}
+
+// ==========================================================================
 // DOM Ready Controller
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1149,5 +1349,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initDocumentsPage();
   } else if (path.includes('access.html')) {
     initAccessPage();
+  } else if (path === '/' || path.includes('index.html') || path === '') {
+    initLandingPage();
   }
 });
