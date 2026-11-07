@@ -59,6 +59,7 @@ Digital_Document_Management/
 │
 ├── routes/
 │   ├── authRoutes.js        # Authentication & user profile endpoints
+│   ├── userRoutes.js        # Users CRUD endpoints (users table)
 │   ├── documentRoutes.js    # Upload, download, view, search, and delete endpoints
 │   ├── categoryRoutes.js    # Category CRUD and document count aggregation
 │   └── accessRoutes.js      # Granular sharing, permissions, and revocation
@@ -70,11 +71,12 @@ Digital_Document_Management/
     ├── index.html           # Landing page with feature showcase
     ├── login.html           # Modern sign-in portal
     ├── register.html        # User registration portal
-    ├── dashboard.html       # Analytics dashboard & quick actions
-    ├── documents.html       # Repository browser with search, filters, table & grid
+    ├── dashboard.html       # Analytics dashboard (4 live MySQL cards)
+    ├── users.html           # users table interface (search, add, edit, delete)
+    ├── categories.html      # categories table interface (with document counts)
+    ├── documents.html       # documents table interface (search, SQL JOIN, download)
+    ├── access.html          # document_access table interface (permissions)
     ├── upload.html          # Drag-and-drop file uploader
-    ├── categories.html      # Category management console
-    ├── access.html          # Document sharing & permission center
     │
     ├── css/
     │   └── style.css        # Enterprise SaaS stylesheet (variables, responsive, dark/light)
