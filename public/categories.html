@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categories – Veerendra Digital Document Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/dashboard.html" class="brand-logo">
+          <div class="brand-icon">
+            <i class="fas fa-file-shield"></i>
+          </div>
+          <div class="brand-text">
+            <h2>Veerendra</h2>
+            <span>Document Vault</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Navigation</div>
+        <a href="/dashboard.html" class="nav-link">
+          <i class="fas fa-chart-pie"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="/documents.html" class="nav-link">
+          <i class="fas fa-folder-open"></i>
+          <span>All Documents</span>
+        </a>
+        <a href="/upload.html" class="nav-link">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <span>Upload Document</span>
+        </a>
+
+        <div class="nav-section-title">Management</div>
+        <a href="/categories.html" class="nav-link active">
+          <i class="fas fa-tags"></i>
+          <span>Categories</span>
+        </a>
+        <a href="/access.html" class="nav-link">
+          <i class="fas fa-user-lock"></i>
+          <span>Document Access</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-snippet">
+          <div class="user-avatar js-user-avatar">U</div>
+          <div class="user-info">
+            <div class="user-name js-user-name">Loading...</div>
+            <div class="user-role-badge js-user-role">User</div>
+          </div>
+          <button class="btn-sidebar-logout js-btn-logout" title="Sign Out">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="page-title-group">
+            <h1>Category Management</h1>
+            <p>Organize documents into structured categories in <strong>Veerendra Vault</strong></p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="btn btn-primary btn-sm" onclick="openModal('addCategoryModal')">
+            <i class="fas fa-plus"></i> New Category
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Body -->
+      <main class="content-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div>
+            <span class="badge" style="background-color: #e0f2fe; color: #0369a1; font-size: 13px; font-weight: 700;" id="categoryTotalCount">
+              Loading...
+            </span>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('addCategoryModal')">
+            <i class="fas fa-folder-plus"></i> Add Category
+          </button>
+        </div>
+
+        <!-- Categories Table Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-list-ul"></i> All Configured Document Categories
+            </div>
+          </div>
+
+          <div class="panel-body" style="padding: 0;">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Category Name</th>
+                    <th>Description</th>
+                    <th>Linked Documents</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="categoriesTableBody">
+                  <tr>
+                    <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                      <i class="fas fa-spinner fa-spin"></i> Loading categories...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add Category Modal -->
+  <div class="modal-overlay" id="addCategoryModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><i class="fas fa-folder-plus" style="color: var(--primary);"></i> Add New Category</h3>
+        <button class="modal-close-btn" onclick="closeModal('addCategoryModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="addCategoryForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="catNameInput">Category Name <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="catNameInput" class="form-control" placeholder="e.g. Research Papers, Tax Invoices" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="catDescInput">Description (Optional)</label>
+            <textarea id="catDescInput" class="form-control" placeholder="Brief explanation of what documents go into this category..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addCategoryModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Save Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Category Modal -->
+  <div class="modal-overlay" id="editCategoryModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><i class="fas fa-edit" style="color: var(--secondary);"></i> Edit Category</h3>
+        <button class="modal-close-btn" onclick="closeModal('editCategoryModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="editCategoryForm">
+        <div class="modal-body">
+          <input type="hidden" id="editCatId">
+          <div class="form-group">
+            <label class="form-label" for="editCatName">Category Name <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="editCatName" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="editCatDesc">Description</label>
+            <textarea id="editCatDesc" class="form-control"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('editCategoryModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Category Confirmation Modal -->
+  <div class="modal-overlay" id="deleteCategoryModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Delete Category</h3>
+        <button class="modal-close-btn" onclick="closeModal('deleteCategoryModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete category <strong id="deleteCategoryName">this category</strong>?</p>
+        <p id="deleteCatWarning" style="display: none; color: var(--danger); font-size: 13px; margin-top: 10px; padding: 10px; background: var(--danger-bg); border-radius: var(--radius-sm); border-left: 3px solid var(--danger);"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('deleteCategoryModal')">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="executeDeleteCategory()"><i class="fas fa-trash-alt"></i> Delete Category</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>

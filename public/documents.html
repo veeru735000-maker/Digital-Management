@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Documents – Veerendra Digital Document Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="app-container" id="documentsList">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/dashboard.html" class="brand-logo">
+          <div class="brand-icon">
+            <i class="fas fa-file-shield"></i>
+          </div>
+          <div class="brand-text">
+            <h2>Veerendra</h2>
+            <span>Document Vault</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Navigation</div>
+        <a href="/dashboard.html" class="nav-link">
+          <i class="fas fa-chart-pie"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="/documents.html" class="nav-link active">
+          <i class="fas fa-folder-open"></i>
+          <span>All Documents</span>
+        </a>
+        <a href="/upload.html" class="nav-link">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <span>Upload Document</span>
+        </a>
+
+        <div class="nav-section-title">Management</div>
+        <a href="/categories.html" class="nav-link">
+          <i class="fas fa-tags"></i>
+          <span>Categories</span>
+        </a>
+        <a href="/access.html" class="nav-link">
+          <i class="fas fa-user-lock"></i>
+          <span>Document Access</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-snippet">
+          <div class="user-avatar js-user-avatar">U</div>
+          <div class="user-info">
+            <div class="user-name js-user-name">Loading...</div>
+            <div class="user-role-badge js-user-role">User</div>
+          </div>
+          <button class="btn-sidebar-logout js-btn-logout" title="Sign Out">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="page-title-group">
+            <h1>Document Repository</h1>
+            <p>Manage, inspect, share, and download files in <strong>Veerendra Vault</strong></p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <a href="/upload.html" class="btn btn-primary btn-sm">
+            <i class="fas fa-cloud-upload-alt"></i> Upload Document
+          </a>
+        </div>
+      </header>
+
+      <!-- Content Body -->
+      <main class="content-body">
+        <!-- Search, Filter, and Controls Bar -->
+        <div class="filter-bar">
+          <div class="search-input-group">
+            <i class="fas fa-search"></i>
+            <input type="text" id="docSearchInput" class="search-input" placeholder="Search by document title or filename...">
+          </div>
+
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <!-- Category Filter -->
+            <select id="categoryFilter" class="select-filter">
+              <option value="">All Categories</option>
+            </select>
+
+            <!-- Ownership Tabs -->
+            <div class="filter-tabs">
+              <button class="tab-btn active" data-filter="all">All Accessible</button>
+              <button class="tab-btn" data-filter="my">My Uploads</button>
+              <button class="tab-btn" data-filter="shared">Shared With Me</button>
+            </div>
+
+            <!-- View Switcher (Table vs Grid) -->
+            <div style="display: flex; gap: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2px; background: #fff;">
+              <button class="btn-icon active" id="viewModeTable" title="Table View">
+                <i class="fas fa-list"></i>
+              </button>
+              <button class="btn-icon" id="viewModeGrid" title="Grid View">
+                <i class="fas fa-th-large"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Document Header Info -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <span class="badge" style="background-color: #e0e7ff; color: #4338ca; font-size: 13px; font-weight: 700;" id="docTotalCountBadge">
+            Loading documents...
+          </span>
+        </div>
+
+        <!-- Table View -->
+        <div class="panel" id="documentsTableView">
+          <div class="panel-body" style="padding: 0;">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Document</th>
+                    <th>Category</th>
+                    <th>Uploader</th>
+                    <th>Uploaded On</th>
+                    <th>Status</th>
+                    <th>Access</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="documentsTableBody">
+                  <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                      <i class="fas fa-spinner fa-spin"></i> Loading documents...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid View (Hidden by default) -->
+        <div class="doc-grid" id="documentsGrid" style="display: none;">
+          <!-- Dynamically populated -->
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Document Preview Modal -->
+  <div class="modal-overlay" id="previewModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 id="previewModalTitle">Document Preview</h3>
+        <button class="modal-close-btn" onclick="closeModal('previewModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="previewModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('previewModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Share Modal -->
+  <div class="modal-overlay" id="quickShareModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="quickShareDocTitle">Share Document</h3>
+        <button class="modal-close-btn" onclick="closeModal('quickShareModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="quickShareDocId">
+        <div class="form-group">
+          <label class="form-label" for="quickShareUserSelect">Select Registered User</label>
+          <select id="quickShareUserSelect" class="form-control">
+            <option value="">Loading users...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="quickSharePermission">Permission Level</label>
+          <select id="quickSharePermission" class="form-control">
+            <option value="view">View Only (Online preview only)</option>
+            <option value="download">View & Download (Full access)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('quickShareModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="executeQuickShare()"><i class="fas fa-share-alt"></i> Grant Permission</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Document Confirmation Modal -->
+  <div class="modal-overlay" id="deleteDocModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Confirm Document Deletion</h3>
+        <button class="modal-close-btn" onclick="closeModal('deleteDocModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to permanently delete <strong id="deleteTargetName">this document</strong>?</p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
+          This will remove the file from server storage and remove all shared access permissions. This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('deleteDocModal')">Cancel</button>
+        <button class="btn btn-danger" onclick="executeDeleteDocument()"><i class="fas fa-trash-alt"></i> Delete Permanently</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>
+

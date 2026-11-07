@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – Veerendra Digital Document Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/dashboard.html" class="brand-logo">
+          <div class="brand-icon">
+            <i class="fas fa-file-shield"></i>
+          </div>
+          <div class="brand-text">
+            <h2>Veerendra</h2>
+            <span>Document Vault</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Navigation</div>
+        <a href="/dashboard.html" class="nav-link active">
+          <i class="fas fa-chart-pie"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="/documents.html" class="nav-link">
+          <i class="fas fa-folder-open"></i>
+          <span>All Documents</span>
+        </a>
+        <a href="/upload.html" class="nav-link">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <span>Upload Document</span>
+        </a>
+
+        <div class="nav-section-title">Management</div>
+        <a href="/categories.html" class="nav-link">
+          <i class="fas fa-tags"></i>
+          <span>Categories</span>
+        </a>
+        <a href="/access.html" class="nav-link">
+          <i class="fas fa-user-lock"></i>
+          <span>Document Access</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-snippet">
+          <div class="user-avatar js-user-avatar">U</div>
+          <div class="user-info">
+            <div class="user-name js-user-name">Loading...</div>
+            <div class="user-role-badge js-user-role">User</div>
+          </div>
+          <button class="btn-sidebar-logout js-btn-logout" title="Sign Out">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="page-title-group">
+            <h1>System Dashboard</h1>
+            <p>Welcome to <strong>Veerendra Document Management System</strong></p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <a href="/upload.html" class="btn btn-primary btn-sm">
+            <i class="fas fa-cloud-upload-alt"></i> Upload Document
+          </a>
+        </div>
+      </header>
+
+      <!-- Content Body -->
+      <main class="content-body">
+        <!-- 4 Stat Counter Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-info">
+              <h3 id="statTotalDocs">0</h3>
+              <p>Total Documents</p>
+            </div>
+            <div class="stat-icon blue">
+              <i class="fas fa-file-alt"></i>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <h3 id="statTotalCategories">0</h3>
+              <p>Total Categories</p>
+            </div>
+            <div class="stat-icon sky">
+              <i class="fas fa-tags"></i>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <h3 id="statTotalUsers">0</h3>
+              <p>Registered Users</p>
+            </div>
+            <div class="stat-icon emerald">
+              <i class="fas fa-users"></i>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <h3 id="statSharedDocs">0</h3>
+              <p>Shared With Me</p>
+            </div>
+            <div class="stat-icon amber">
+              <i class="fas fa-share-nodes"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions & Category Distribution -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 28px;">
+          <!-- Quick Action Buttons -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fas fa-bolt"></i> Quick Operations
+              </div>
+            </div>
+            <div class="panel-body" style="display: flex; flex-direction: column; gap: 12px;">
+              <a href="/upload.html" class="btn btn-primary" style="justify-content: flex-start; padding: 14px 18px;">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 18px; width: 24px;"></i>
+                <div style="text-align: left;">
+                  <div style="font-weight: 700;">Upload New Document</div>
+                  <div style="font-size: 11px; opacity: 0.85;">Add PDF, DOCX, JPG or PNG to vault</div>
+                </div>
+              </a>
+
+              <a href="/documents.html" class="btn btn-secondary" style="justify-content: flex-start; padding: 14px 18px;">
+                <i class="fas fa-search" style="font-size: 18px; width: 24px; color: var(--primary);"></i>
+                <div style="text-align: left;">
+                  <div style="font-weight: 700;">Search & Browse Vault</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Filter by categories or file types</div>
+                </div>
+              </a>
+
+              <a href="/access.html" class="btn btn-secondary" style="justify-content: flex-start; padding: 14px 18px;">
+                <i class="fas fa-user-lock" style="font-size: 18px; width: 24px; color: var(--accent);"></i>
+                <div style="text-align: left;">
+                  <div style="font-weight: 700;">Document Sharing Permissions</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Share files with View or Download rights</div>
+                </div>
+              </a>
+
+              <a href="/categories.html" class="btn btn-secondary" style="justify-content: flex-start; padding: 14px 18px;">
+                <i class="fas fa-folder-plus" style="font-size: 18px; width: 24px; color: var(--success);"></i>
+                <div style="text-align: left;">
+                  <div style="font-weight: 700;">Manage Categories</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Create and organize folder categories</div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- Category Breakdown -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fas fa-chart-bar"></i> Document Distribution by Category
+              </div>
+              <a href="/categories.html" class="btn btn-outline btn-sm">View All</a>
+            </div>
+            <div class="panel-body" id="dashboardCategoryStats">
+              <div style="text-align: center; padding: 24px; color: var(--text-muted);">
+                <i class="fas fa-spinner fa-spin"></i> Loading statistics...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Documents Table -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-history"></i> Recent Vault Documents
+            </div>
+            <a href="/documents.html" class="btn btn-secondary btn-sm">View All Documents <i class="fas fa-arrow-right"></i></a>
+          </div>
+          <div class="panel-body" style="padding: 0;">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Document</th>
+                    <th>Category</th>
+                    <th>Upload Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="recentDocumentsTable">
+                  <tr>
+                    <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                      <i class="fas fa-spinner fa-spin"></i> Loading recent documents...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Document Preview Modal -->
+  <div class="modal-overlay" id="previewModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 id="previewModalTitle">Document Preview</h3>
+        <button class="modal-close-btn" onclick="closeModal('previewModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="previewModalBody">
+        <!-- Iframe / content injected dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('previewModal')">Close Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>
+

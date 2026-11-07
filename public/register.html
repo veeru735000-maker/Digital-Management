@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register – Veerendra Digital Document Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <a href="/" class="auth-logo">
+          <i class="fas fa-file-shield"></i>
+        </a>
+        <h2>Create Account</h2>
+        <p>Register for <strong>Veerendra Vault</strong></p>
+      </div>
+
+      <form id="registerForm" class="auth-form">
+        <div class="form-group">
+          <label class="form-label" for="regName">Full Name</label>
+          <input type="text" id="regName" class="form-control" placeholder="e.g. Veerendra Kumar" required autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Email Address</label>
+          <input type="email" id="regEmail" class="form-control" placeholder="name@example.com" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regRole">Account Role</label>
+          <select id="regRole" class="form-control" style="background-color: rgba(15, 23, 42, 0.7); color: #fff;">
+            <option value="user" selected>Standard User (Upload, View & Share)</option>
+            <option value="admin">Administrator (Full Vault Controls)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPassword">Password</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="Minimum 6 characters" required autocomplete="new-password">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regConfirmPassword">Confirm Password</label>
+          <input type="password" id="regConfirmPassword" class="form-control" placeholder="Re-type your password" required autocomplete="new-password">
+        </div>
+
+        <button type="submit" id="btnRegisterSubmit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">
+          <i class="fas fa-user-plus"></i> Complete Registration
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a href="/login.html">Sign in here</a></p>
+        <p style="margin-top: 12px;"><a href="/" style="color: #94a3b8;"><i class="fas fa-arrow-left"></i> Back to Homepage</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('registerForm');
+      const submitBtn = document.getElementById('btnRegisterSubmit');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('regName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const role = document.getElementById('regRole').value;
+        const password = document.getElementById('regPassword').value;
+        const confirmPassword = document.getElementById('regConfirmPassword').value;
+
+        if (!name || !email || !password) {
+          showToast('Please fill in all required fields.', 'warning');
+          return;
+        }
+
+        if (password.length < 6) {
+          showToast('Password must be at least 6 characters long.', 'warning');
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          showToast('Passwords do not match. Please re-check.', 'warning');
+          return;
+        }
+
+        const origHtml = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+
+        try {
+          const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password, role })
+          });
+
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showToast('Account created successfully! Welcome aboard.', 'success');
+            setTimeout(() => {
+              window.location.href = '/dashboard.html';
+            }, 600);
+          } else {
+            showToast(data.message || 'Registration failed.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = origHtml;
+          }
+        } catch (err) {
+          showToast('Connection error during registration.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origHtml;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+

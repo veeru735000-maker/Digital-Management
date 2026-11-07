@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Access & Permissions – Veerendra Digital Document Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/dashboard.html" class="brand-logo">
+          <div class="brand-icon">
+            <i class="fas fa-file-shield"></i>
+          </div>
+          <div class="brand-text">
+            <h2>Veerendra</h2>
+            <span>Document Vault</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Navigation</div>
+        <a href="/dashboard.html" class="nav-link">
+          <i class="fas fa-chart-pie"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="/documents.html" class="nav-link">
+          <i class="fas fa-folder-open"></i>
+          <span>All Documents</span>
+        </a>
+        <a href="/upload.html" class="nav-link">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <span>Upload Document</span>
+        </a>
+
+        <div class="nav-section-title">Management</div>
+        <a href="/categories.html" class="nav-link">
+          <i class="fas fa-tags"></i>
+          <span>Categories</span>
+        </a>
+        <a href="/access.html" class="nav-link active">
+          <i class="fas fa-user-lock"></i>
+          <span>Document Access</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-snippet">
+          <div class="user-avatar js-user-avatar">U</div>
+          <div class="user-info">
+            <div class="user-name js-user-name">Loading...</div>
+            <div class="user-role-badge js-user-role">User</div>
+          </div>
+          <button class="btn-sidebar-logout js-btn-logout" title="Sign Out">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="page-title-group">
+            <h1>Document Access Control</h1>
+            <p>Manage sharing permissions and multi-user access in <strong>Veerendra Vault</strong></p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <a href="/upload.html" class="btn btn-primary btn-sm">
+            <i class="fas fa-cloud-upload-alt"></i> Upload Document
+          </a>
+        </div>
+      </header>
+
+      <!-- Content Body -->
+      <main class="content-body">
+        <!-- Share Document Form Panel -->
+        <div class="panel" style="margin-bottom: 32px;">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-share-nodes"></i> Grant Document Sharing Permission
+            </div>
+          </div>
+
+          <div class="panel-body">
+            <form id="shareDocumentForm">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px;">
+                <!-- Select Document -->
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label class="form-label" for="shareDocSelect">Select Your Document <span style="color: var(--danger);">*</span></label>
+                  <select id="shareDocSelect" class="form-control" required>
+                    <option value="">Loading your documents...</option>
+                  </select>
+                </div>
+
+                <!-- Select Target User -->
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label class="form-label" for="shareUserSelect">Recipient Registered User <span style="color: var(--danger);">*</span></label>
+                  <select id="shareUserSelect" class="form-control" required>
+                    <option value="">Loading users...</option>
+                  </select>
+                </div>
+
+                <!-- Select Permission -->
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label class="form-label" for="sharePermissionSelect">Permission Level</label>
+                  <select id="sharePermissionSelect" class="form-control">
+                    <option value="view" selected>View Only (Online preview only)</option>
+                    <option value="download">View & Download (Full access)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+                <button type="submit" id="btnSubmitShare" class="btn btn-primary" style="padding: 10px 24px;">
+                  <i class="fas fa-user-plus"></i> Share Document
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Section 1: Documents Shared By You -->
+        <div class="panel" style="margin-bottom: 32px;">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-paper-plane" style="color: var(--primary);"></i> Documents You Have Shared With Others
+            </div>
+          </div>
+
+          <div class="panel-body" style="padding: 0;">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Document</th>
+                    <th>Shared With User</th>
+                    <th>Permission</th>
+                    <th>Date Granted</th>
+                    <th>Revoke Access</th>
+                  </tr>
+                </thead>
+                <tbody id="sharedByMeTableBody">
+                  <tr>
+                    <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                      <i class="fas fa-spinner fa-spin"></i> Loading shared permissions...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Documents Shared With You -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-inbox" style="color: var(--secondary);"></i> Documents Shared With You
+            </div>
+          </div>
+
+          <div class="panel-body" style="padding: 0;">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Document</th>
+                    <th>Category</th>
+                    <th>Owner</th>
+                    <th>Your Permission</th>
+                    <th>Shared Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="sharedWithMeTableBody">
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                      <i class="fas fa-spinner fa-spin"></i> Loading shared documents...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Document Preview Modal -->
+  <div class="modal-overlay" id="previewModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 id="previewModalTitle">Document Preview</h3>
+        <button class="modal-close-btn" onclick="closeModal('previewModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="previewModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('previewModal')">Close Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>
+
